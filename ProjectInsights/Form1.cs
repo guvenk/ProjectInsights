@@ -15,22 +15,19 @@ namespace ProjectInsights
             InitializeComponent();
         }
 
-        private const string CSharpExtention = ".cs";
-        private readonly int stopCount = 45;
-        private readonly HashSet<string> excludedDirectories = new HashSet<string>() { "Proxies", "Migrations", };
-        //private readonly char[] nameDelimeters = new[] { ' ', '.', '-' };
+        //readonly char[] nameDelimeters = new[] { ' ', '.', '-' };
 
-        private const string projectDirectory = @"C:\Users\Guven\Desktop\BI";
-        private const string space = " ";
+        const string projectDirectory = @"C:\Users\Guven\Desktop\BI";
+        const string space = " ";
 
-        private void btnShow_Click(object sender, EventArgs e)
+        void btnShow_Click(object sender, EventArgs e)
         {
             try
             {
                 txtContent.Text = string.Empty;
 
                 Process gitProcess = CreateGitProcess("ls-files");
-                var files = GetFiles(gitProcess.StandardOutput);
+                var files = FileHelper.GetFiles(gitProcess.StandardOutput);
                 var metrics = GetMetrics(files);
                 ShowMetrics(metrics);
                 //ShowFiles(files);
@@ -39,7 +36,7 @@ namespace ProjectInsights
             catch (Exception ex) { lblError.Text = ex.Message; }
         }
 
-        private IDictionary<string, int> GetMetrics(ICollection<string> files)
+        IDictionary<string, int> GetMetrics(ICollection<string> files)
         {
             var metrics = CalculateMetrics(files);
 
@@ -50,10 +47,10 @@ namespace ProjectInsights
             return sortedMetrics;
         }
 
-        private static IDictionary<string, int> GetSortedMetrics(IDictionary<string, int> metrics)
-        => metrics.OrderByDescending(a => a.Value).ToDictionary(a => a.Key, b => b.Value);
+        static IDictionary<string, int> GetSortedMetrics(IDictionary<string, int> metrics)
+            => metrics.OrderByDescending(a => a.Value).ToDictionary(a => a.Key, b => b.Value);
 
-        private IDictionary<string, int> CalculateMetrics(ICollection<string> files)
+        IDictionary<string, int> CalculateMetrics(ICollection<string> files)
         {
             var metrics = new Dictionary<string, int>();
             foreach (var file in files)
@@ -65,7 +62,7 @@ namespace ProjectInsights
             return metrics;
         }
 
-        private void EliminateDuplicates(IDictionary<string, int> metricsDictionary)
+        void EliminateDuplicates(IDictionary<string, int> metricsDictionary)
         {
             bool combinationFound = true;
 
@@ -77,43 +74,17 @@ namespace ProjectInsights
         }
 
 
-        private IDictionary<string, int> GetFileMetrics(string fileName)
+        IDictionary<string, int> GetFileMetrics(string fileName)
         {
             string gitBlameCommand = $"blame {fileName} -fte";
             var gitProcess = CreateGitProcess(gitBlameCommand);
-            var authors = GetAuthorsFromFile(gitProcess.StandardOutput, fileName);
+            var authors = FileHelper.GetAuthorsFromFile(gitProcess.StandardOutput, fileName);
             var fileMetrics = MetricsHelper.GroupMetricsByAuthorName(authors);
 
             return fileMetrics;
         }
 
-        private IList<string> GetAuthorsFromFile(StreamReader output, string fileName)
-        {
-            var list = new List<string>();
 
-            string line;
-            while ((line = output.ReadLine()) != null)
-            {
-                if (line.Contains(fileName))
-                {
-                    string author = SanitizeLine(line);
-                    list.Add(author);
-                    //if (author.ToLower().Contains("somename"))
-                    //    ben.Add(fileName);
-                }
-            }
-
-            return list;
-        }
-
-        private static string SanitizeLine(string line)
-        {
-            int startIdx = line.IndexOf("<") + 1;
-            int length = line.IndexOf(">") - startIdx;
-            line = line.Substring(startIdx, length);
-            line = line.Substring(0, line.IndexOf("@")).Replace(".", space);
-            return line;
-        }
 
         private Process CreateGitProcess(string command)
         {
@@ -132,35 +103,6 @@ namespace ProjectInsights
             return cmdProcess;
         }
 
-        private ICollection<string> GetFiles(StreamReader output)
-        {
-            var files = new HashSet<string>();
-            int count = 1;
-
-            string line;
-            while ((line = output.ReadLine()) != null)
-            {
-                if (count == stopCount && stopCount != -1) break;
-
-                AddFile(files, line);
-                count++;
-            }
-
-            return files;
-        }
-
-        private void AddFile(HashSet<string> files, string line)
-        {
-            string extension = Path.GetExtension(line);
-            bool includedDirectory = IsIncludedDirectory(line);
-
-            if (extension == CSharpExtention && includedDirectory)
-            {
-                files.Add(line);
-            }
-        }
-
-        private bool IsIncludedDirectory(string line) => excludedDirectories.Where(a => line.Contains(a)).Count() == 0;
 
 
         //private void ShowFiles(ICollection<string> files)
