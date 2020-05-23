@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -16,9 +15,7 @@ namespace ProjectInsights
         }
 
         //readonly char[] nameDelimeters = new[] { ' ', '.', '-' };
-
         const string projectDirectory = @"C:\Users\Guven\Desktop\BI";
-        const string space = " ";
 
         void btnShow_Click(object sender, EventArgs e)
         {
@@ -73,7 +70,6 @@ namespace ProjectInsights
             }
         }
 
-
         IDictionary<string, int> GetFileMetrics(string fileName)
         {
             string gitBlameCommand = $"blame {fileName} -fte";
@@ -83,8 +79,6 @@ namespace ProjectInsights
 
             return fileMetrics;
         }
-
-
 
         private Process CreateGitProcess(string command)
         {
@@ -102,7 +96,6 @@ namespace ProjectInsights
             Process cmdProcess = Process.Start(startInfo);
             return cmdProcess;
         }
-
 
 
         //private void ShowFiles(ICollection<string> files)
