@@ -12,12 +12,17 @@ namespace ProjectInsights
             int[,] distance = new int[source.Length + 1, target.Length + 1];
 
             // Step 2
-            for (int i = 0; i <= source.Length; distance[i, 0] = i++) ;
-            for (int j = 0; j <= target.Length; distance[0, j] = j++) ;
+            Step2(source, target, distance);
 
             Step3and4(source, target, distance);
 
             return distance[source.Length, target.Length];
+        }
+
+        private static void Step2(string source, string target, int[,] distance)
+        {
+            for (int i = 0; i <= source.Length; distance[i, 0] = i++) ;
+            for (int j = 0; j <= target.Length; distance[0, j] = j++) ;
         }
 
         private static void Step3and4(string source, string target, int[,] distance)
@@ -30,8 +35,12 @@ namespace ProjectInsights
         private static void CalculateDistance(string source, string target, int[,] distance, int i, int j)
         {
             int cost = (target[j - 1] == source[i - 1]) ? 0 : 1;
-            distance[i, j] = Math.Min(Math.Min(distance[i - 1, j] + 1, distance[i, j - 1] + 1), distance[i - 1, j - 1] + cost);
+            distance[i, j] = GetDistance(distance, i, j, cost);
         }
+
+        private static int GetDistance(int[,] distance, int i, int j, int cost)
+            => Math.Min(Math.Min(distance[i - 1, j] + 1, distance[i, j - 1] + 1), distance[i - 1, j - 1] + cost);
+
 
         public static int GetSimilarityPercentage(string source, string target)
         {
@@ -44,8 +53,7 @@ namespace ProjectInsights
         }
 
         private static double GetPercentage(string source, string target, int stepsToSame)
-        {
-            return 1.0 - (stepsToSame / (double)Math.Max(source.Length, target.Length));
-        }
+            => 1.0 - (stepsToSame / (double)Math.Max(source.Length, target.Length));
+
     }
 }

@@ -53,19 +53,17 @@ namespace ProjectInsights
         private static IDictionary<string, int> GetSortedMetrics(IDictionary<string, int> metrics)
         => metrics.OrderByDescending(a => a.Value).ToDictionary(a => a.Key, b => b.Value);
 
-
         private IDictionary<string, int> CalculateMetrics(ICollection<string> files)
         {
             var metrics = new Dictionary<string, int>();
             foreach (var file in files)
             {
                 var fileMetrics = GetFileMetrics(file);
-                AddFileMetrics(metrics, fileMetrics);
+                MetricsHelper.AddFileMetrics(metrics, fileMetrics);
             }
 
             return metrics;
         }
-
 
         private void EliminateDuplicates(IDictionary<string, int> metricsDictionary)
         {
@@ -73,90 +71,20 @@ namespace ProjectInsights
 
             while (combinationFound)
             {
-                combinationFound = IsCombinationFound(metricsDictionary);
+                int similarityPercentage = int.Parse(txtSimilarity.Text);
+                combinationFound = MetricsHelper.IsCombinationFound(metricsDictionary, similarityPercentage);
             }
         }
 
-        private bool IsCombinationFound(IDictionary<string, int> metricsDictionary)
-        {
-            bool combinationFound = false;
-            foreach (var metric in metricsDictionary)
-            {
-                string firstName = GetFirstPart(metric.Key);
-                var otherKeys = GetOtherKeys(metricsDictionary, metric);
-                foreach (var otherKey in otherKeys)
-                {
-                    combinationFound = ProcessCombination(metricsDictionary, metric, firstName, otherKey);
-                    if (combinationFound) break;
-                }
-                if (combinationFound) break;
-            }
-
-            return combinationFound;
-        }
-
-        private bool ProcessCombination(IDictionary<string, int> metricsDictionary, KeyValuePair<string, int> metric, string firstName, string otherKey)
-        {
-            string otherFirstName = GetFirstPart(otherKey);
-            int similarityAllowance = int.Parse(txtSimilarity.Text);
-
-            if (StringHelper.GetSimilarityPercentage(otherFirstName, firstName) >= similarityAllowance)
-            {
-                CombineAuthors(metricsDictionary, metric.Key, otherKey);
-                return true;
-            }
-
-            return false;
-        }
-
-        private static IEnumerable<string> GetOtherKeys(IDictionary<string, int> metricsDictionary, KeyValuePair<string, int> metric)
-        {
-            return metricsDictionary.Keys.Where(a => a != metric.Key);
-        }
-
-        private static string GetFirstPart(string key) => key.Split(space).First();
-
-
-        private static void CombineAuthors(IDictionary<string, int> dict, string metricKey, string otherKey)
-        {
-            int total = dict[metricKey] + dict[otherKey];
-
-            if (metricKey.Length > otherKey.Length)
-            {
-                dict[metricKey] = total;
-                dict.Remove(otherKey);
-            }
-            else
-            {
-                dict[otherKey] = total;
-                dict.Remove(metricKey);
-            }
-        }
 
         private IDictionary<string, int> GetFileMetrics(string fileName)
         {
             string gitBlameCommand = $"blame {fileName} -fte";
             var gitProcess = CreateGitProcess(gitBlameCommand);
             var authors = GetAuthorsFromFile(gitProcess.StandardOutput, fileName);
-            var fileMetrics = GroupMetricsByAuthorName(authors);
+            var fileMetrics = MetricsHelper.GroupMetricsByAuthorName(authors);
 
             return fileMetrics;
-        }
-
-        private static Dictionary<string, int> GroupMetricsByAuthorName(IList<string> authors)
-        {
-            return authors.GroupBy(a => a).ToDictionary(g => g.Key, g => g.Count());
-        }
-
-        private static void AddFileMetrics(IDictionary<string, int> metrics, IDictionary<string, int> fileMetrics)
-        {
-            foreach (var pair in fileMetrics)
-            {
-                if (!metrics.ContainsKey(pair.Key))
-                    metrics[pair.Key] = pair.Value;
-                else
-                    metrics[pair.Key] += pair.Value;
-            }
         }
 
         private IList<string> GetAuthorsFromFile(StreamReader output, string fileName)
@@ -235,12 +163,12 @@ namespace ProjectInsights
         private bool IsIncludedDirectory(string line) => excludedDirectories.Where(a => line.Contains(a)).Count() == 0;
 
 
-        private void ShowFiles(ICollection<string> files)
-        {
-            txtContent.Text += string.Join(Environment.NewLine, files);
-            txtContent.Text += Environment.NewLine + Environment.NewLine;
-            txtContent.Text += $"Files Count: {files.Count}";
-        }
+        //private void ShowFiles(ICollection<string> files)
+        //{
+        //    txtContent.Text += string.Join(Environment.NewLine, files);
+        //    txtContent.Text += Environment.NewLine + Environment.NewLine;
+        //    txtContent.Text += $"Files Count: {files.Count}";
+        //}
 
         private void ShowMetrics(IDictionary<string, int> metrics)
         {
