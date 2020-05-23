@@ -16,7 +16,7 @@ namespace ProjectInsights
         }
 
         private const string CSharpExtention = ".cs";
-        private readonly int stopCount = 15;
+        private readonly int stopCount = 45;
         private readonly HashSet<string> excludedDirectories = new HashSet<string>() { "Proxies", "Migrations", };
         //private readonly char[] nameDelimeters = new[] { ' ', '.', '-' };
 
@@ -30,7 +30,7 @@ namespace ProjectInsights
                 txtContent.Text = string.Empty;
 
                 Process gitProcess = CreateGitProcess("ls-files");
-                HashSet<string> files = GetFiles(gitProcess.StandardOutput);
+                var files = GetFiles(gitProcess.StandardOutput);
                 var metrics = GetMetrics(files);
                 ShowMetrics(metrics);
                 //ShowFiles(files);
@@ -39,57 +39,22 @@ namespace ProjectInsights
             catch (Exception ex) { lblError.Text = ex.Message; }
         }
 
-        private Dictionary<string, int> GetMetrics(HashSet<string> files)
+        private IDictionary<string, int> GetMetrics(ICollection<string> files)
         {
             var metrics = CalculateMetrics(files);
 
             EliminateDuplicates(metrics);
 
-            var sortedMetrics = metrics.OrderByDescending(a => a.Value).ToDictionary(a => a.Key, b => b.Value);
+            var sortedMetrics = GetSortedMetrics(metrics);
 
             return sortedMetrics;
         }
 
-        private void EliminateDuplicates(Dictionary<string, int> metricsDictionary)
-        {
-            var dic = new Dictionary<string, int>();
-            bool combinationFound = true;
+        private static IDictionary<string, int> GetSortedMetrics(IDictionary<string, int> metrics)
+        => metrics.OrderByDescending(a => a.Value).ToDictionary(a => a.Key, b => b.Value);
 
-            while (combinationFound)
-            {
-                combinationFound = false;
-                foreach (var metric in metricsDictionary)
-                {
-                    string firstName = metric.Key.Split(space).First();
-                    foreach (var otherKey in metricsDictionary.Keys.Where(a => a != metric.Key))
-                    {
-                        string otherFirstName = otherKey.Split(space).First();
-                        int similarityAllowance = int.Parse(txtSimilarity.Text);
 
-                        if (StringHelper.GetSimilarityPercentage(otherFirstName, firstName) >= similarityAllowance)
-                        {
-                            int total = metricsDictionary[metric.Key] + metricsDictionary[otherKey];
-
-                            if (metric.Key.Length > otherKey.Length)
-                            {
-                                metricsDictionary[metric.Key] = total;
-                                metricsDictionary.Remove(otherKey);
-                            }
-                            else
-                            {
-                                metricsDictionary[otherKey] = total;
-                                metricsDictionary.Remove(metric.Key);
-                            }
-                            combinationFound = true;
-                            break;
-                        }
-                    }
-                    if (combinationFound) break;
-                }
-            }
-        }
-
-        private Dictionary<string, int> CalculateMetrics(HashSet<string> files)
+        private IDictionary<string, int> CalculateMetrics(ICollection<string> files)
         {
             var metrics = new Dictionary<string, int>();
             foreach (var file in files)
@@ -101,26 +66,89 @@ namespace ProjectInsights
             return metrics;
         }
 
-        private static void PrintOutput()
+
+        private void EliminateDuplicates(IDictionary<string, int> metricsDictionary)
         {
-            var sw = new StreamWriter(@"C:\Users\Guven\Desktop\out.txt");
-            foreach (var item in output)
-                sw.WriteLine(item);
-            sw.Close();
+            bool combinationFound = true;
+
+            while (combinationFound)
+            {
+                combinationFound = IsCombinationFound(metricsDictionary);
+            }
         }
 
-        private Dictionary<string, int> GetFileMetrics(string fileName)
+        private bool IsCombinationFound(IDictionary<string, int> metricsDictionary)
+        {
+            bool combinationFound = false;
+            foreach (var metric in metricsDictionary)
+            {
+                string firstName = GetFirstPart(metric.Key);
+                var otherKeys = GetOtherKeys(metricsDictionary, metric);
+                foreach (var otherKey in otherKeys)
+                {
+                    combinationFound = ProcessCombination(metricsDictionary, metric, firstName, otherKey);
+                    if (combinationFound) break;
+                }
+                if (combinationFound) break;
+            }
+
+            return combinationFound;
+        }
+
+        private bool ProcessCombination(IDictionary<string, int> metricsDictionary, KeyValuePair<string, int> metric, string firstName, string otherKey)
+        {
+            string otherFirstName = GetFirstPart(otherKey);
+            int similarityAllowance = int.Parse(txtSimilarity.Text);
+
+            if (StringHelper.GetSimilarityPercentage(otherFirstName, firstName) >= similarityAllowance)
+            {
+                CombineAuthors(metricsDictionary, metric.Key, otherKey);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static IEnumerable<string> GetOtherKeys(IDictionary<string, int> metricsDictionary, KeyValuePair<string, int> metric)
+        {
+            return metricsDictionary.Keys.Where(a => a != metric.Key);
+        }
+
+        private static string GetFirstPart(string key) => key.Split(space).First();
+
+
+        private static void CombineAuthors(IDictionary<string, int> dict, string metricKey, string otherKey)
+        {
+            int total = dict[metricKey] + dict[otherKey];
+
+            if (metricKey.Length > otherKey.Length)
+            {
+                dict[metricKey] = total;
+                dict.Remove(otherKey);
+            }
+            else
+            {
+                dict[otherKey] = total;
+                dict.Remove(metricKey);
+            }
+        }
+
+        private IDictionary<string, int> GetFileMetrics(string fileName)
         {
             string gitBlameCommand = $"blame {fileName} -fte";
             var gitProcess = CreateGitProcess(gitBlameCommand);
             var authors = GetAuthorsFromFile(gitProcess.StandardOutput, fileName);
-            var fileMetrics = authors.GroupBy(a => a)
-                .ToDictionary(g => g.Key, g => g.Count());
+            var fileMetrics = GroupMetricsByAuthorName(authors);
 
             return fileMetrics;
         }
 
-        private static void AddFileMetrics(Dictionary<string, int> metrics, Dictionary<string, int> fileMetrics)
+        private static Dictionary<string, int> GroupMetricsByAuthorName(IList<string> authors)
+        {
+            return authors.GroupBy(a => a).ToDictionary(g => g.Key, g => g.Count());
+        }
+
+        private static void AddFileMetrics(IDictionary<string, int> metrics, IDictionary<string, int> fileMetrics)
         {
             foreach (var pair in fileMetrics)
             {
@@ -130,9 +158,8 @@ namespace ProjectInsights
                     metrics[pair.Key] += pair.Value;
             }
         }
-        static readonly List<string> output = new List<string>();
 
-        private List<string> GetAuthorsFromFile(StreamReader output, string fileName)
+        private IList<string> GetAuthorsFromFile(StreamReader output, string fileName)
         {
             var list = new List<string>();
 
@@ -156,8 +183,7 @@ namespace ProjectInsights
             int startIdx = line.IndexOf("<") + 1;
             int length = line.IndexOf(">") - startIdx;
             line = line.Substring(startIdx, length);
-            line = line.Substring(0, line.IndexOf("@"));
-            line = line.Replace(".", space);
+            line = line.Substring(0, line.IndexOf("@")).Replace(".", space);
             return line;
         }
 
@@ -178,7 +204,7 @@ namespace ProjectInsights
             return cmdProcess;
         }
 
-        private HashSet<string> GetFiles(StreamReader output)
+        private ICollection<string> GetFiles(StreamReader output)
         {
             var files = new HashSet<string>();
             int count = 1;
@@ -188,25 +214,35 @@ namespace ProjectInsights
             {
                 if (count == stopCount && stopCount != -1) break;
 
-                string extension = Path.GetExtension(line);
-                bool includedDirectory = excludedDirectories.Where(a => line.Contains(a)).Count() == 0;
-                if (extension == CSharpExtention && includedDirectory)
-                {
-                    files.Add(line);
-                    count++;
-                }
+                AddFile(files, line);
+                count++;
             }
+
             return files;
         }
 
-        private void ShowFiles(HashSet<string> files)
+        private void AddFile(HashSet<string> files, string line)
+        {
+            string extension = Path.GetExtension(line);
+            bool includedDirectory = IsIncludedDirectory(line);
+
+            if (extension == CSharpExtention && includedDirectory)
+            {
+                files.Add(line);
+            }
+        }
+
+        private bool IsIncludedDirectory(string line) => excludedDirectories.Where(a => line.Contains(a)).Count() == 0;
+
+
+        private void ShowFiles(ICollection<string> files)
         {
             txtContent.Text += string.Join(Environment.NewLine, files);
             txtContent.Text += Environment.NewLine + Environment.NewLine;
             txtContent.Text += $"Files Count: {files.Count}";
         }
 
-        private void ShowMetrics(Dictionary<string, int> metrics)
+        private void ShowMetrics(IDictionary<string, int> metrics)
         {
             var sb = new StringBuilder();
             foreach (var metric in metrics)

@@ -4,57 +4,48 @@ namespace ProjectInsights
 {
     public class StringHelper
     {
-        /// <summary>
-        /// Returns the number of steps required to transform the source string
-        /// into the target string.
-        /// </summary>
         public static int ComputeLevenshteinDistance(string source, string target)
         {
-            if ((source == null) || (target == null)) return 0;
-            if ((source.Length == 0) || (target.Length == 0)) return 0;
-            if (source == target) return source.Length;
+            if (source == target)
+                return source.Length;
 
-            int sourceWordCount = source.Length;
-            int targetWordCount = target.Length;
-
-            // Step 1
-            if (sourceWordCount == 0)
-                return targetWordCount;
-
-            if (targetWordCount == 0)
-                return sourceWordCount;
-
-            int[,] distance = new int[sourceWordCount + 1, targetWordCount + 1];
+            int[,] distance = new int[source.Length + 1, target.Length + 1];
 
             // Step 2
-            for (int i = 0; i <= sourceWordCount; distance[i, 0] = i++) ;
-            for (int j = 0; j <= targetWordCount; distance[0, j] = j++) ;
+            for (int i = 0; i <= source.Length; distance[i, 0] = i++) ;
+            for (int j = 0; j <= target.Length; distance[0, j] = j++) ;
 
-            for (int i = 1; i <= sourceWordCount; i++)
-            {
-                for (int j = 1; j <= targetWordCount; j++)
-                {
-                    // Step 3
-                    int cost = (target[j - 1] == source[i - 1]) ? 0 : 1;
+            Step3and4(source, target, distance);
 
-                    // Step 4
-                    distance[i, j] = Math.Min(Math.Min(distance[i - 1, j] + 1, distance[i, j - 1] + 1), distance[i - 1, j - 1] + cost);
-                }
-            }
-
-            return distance[sourceWordCount, targetWordCount];
+            return distance[source.Length, target.Length];
         }
 
+        private static void Step3and4(string source, string target, int[,] distance)
+        {
+            for (int i = 1; i <= source.Length; i++)
+                for (int j = 1; j <= target.Length; j++)
+                    CalculateDistance(source, target, distance, i, j);
+        }
+
+        private static void CalculateDistance(string source, string target, int[,] distance, int i, int j)
+        {
+            int cost = (target[j - 1] == source[i - 1]) ? 0 : 1;
+            distance[i, j] = Math.Min(Math.Min(distance[i - 1, j] + 1, distance[i, j - 1] + 1), distance[i - 1, j - 1] + cost);
+        }
 
         public static int GetSimilarityPercentage(string source, string target)
         {
-            if ((source == null) || (target == null)) return 0;
-            if ((source.Length == 0) || (target.Length == 0)) return 0;
-            if (source == target) return 100;
+            if (source == target)
+                return 100;
 
             int stepsToSame = ComputeLevenshteinDistance(source, target);
-            var result = 1.0 - (stepsToSame / (double)Math.Max(source.Length, target.Length));
-            return Convert.ToInt32(result * 100);
+            var percentage = GetPercentage(source, target, stepsToSame);
+            return Convert.ToInt32(percentage * 100);
+        }
+
+        private static double GetPercentage(string source, string target, int stepsToSame)
+        {
+            return 1.0 - (stepsToSame / (double)Math.Max(source.Length, target.Length));
         }
     }
 }
