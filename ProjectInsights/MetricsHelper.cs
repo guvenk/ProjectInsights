@@ -5,8 +5,6 @@ namespace ProjectInsights
 {
     public class MetricsHelper
     {
-        private const string space = " ";
-
         public static void AddFileMetrics(IDictionary<string, int> metrics, IDictionary<string, int> fileMetrics)
         {
             foreach (var pair in fileMetrics)
@@ -57,7 +55,7 @@ namespace ProjectInsights
             return metricsDictionary.Keys.Where(a => a != metric.Key);
         }
 
-        static string GetFirstPart(string key) => key.Split(space).First();
+        static string GetFirstPart(string key) => key.Split(Constants.Space).First();
 
         static void CombineAuthors(IDictionary<string, int> dict, string metricKey, string otherKey)
         {

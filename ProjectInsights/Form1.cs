@@ -14,9 +14,6 @@ namespace ProjectInsights
             InitializeComponent();
         }
 
-        //readonly char[] nameDelimeters = new[] { ' ', '.', '-' };
-        const string projectDirectory = @"C:\Users\Guven\Desktop\BI";
-
         void btnShow_Click(object sender, EventArgs e)
         {
             try
@@ -118,7 +115,7 @@ namespace ProjectInsights
 
         private void FormInsights_Load(object sender, EventArgs e)
         {
-            txtProjectPath.Text = projectDirectory;
+            txtProjectPath.Text = Constants.RepositoryPath;
         }
 
         private void txtSimilarity_KeyPress(object sender, KeyPressEventArgs e)

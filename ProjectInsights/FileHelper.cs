@@ -6,10 +6,6 @@ namespace ProjectInsights
 {
     public class FileHelper
     {
-        static readonly int stopCount = 45;
-        const string space = " ";
-        const string CSharpExtention = ".cs";
-        static readonly HashSet<string> excludedDirectories = new HashSet<string>() { "Proxies", "Migrations", };
 
         public static IList<string> GetAuthorsFromFile(StreamReader output, string fileName)
         {
@@ -35,7 +31,7 @@ namespace ProjectInsights
             int startIdx = line.IndexOf("<") + 1;
             int length = line.IndexOf(">") - startIdx;
             line = line.Substring(startIdx, length);
-            line = line.Substring(0, line.IndexOf("@")).Replace(".", space);
+            line = line.Substring(0, line.IndexOf("@")).Replace(".", Constants.Space);
             return line;
         }
 
@@ -47,7 +43,7 @@ namespace ProjectInsights
             string line;
             while ((line = output.ReadLine()) != null)
             {
-                if (count == stopCount && stopCount != -1) break;
+                if (count == Constants.StopCount && Constants.StopCount != -1) break;
 
                 AddFile(files, line);
                 count++;
@@ -61,13 +57,12 @@ namespace ProjectInsights
             string extension = Path.GetExtension(line);
             bool includedDirectory = IsIncludedDirectory(line);
 
-            if (extension == CSharpExtention && includedDirectory)
+            if (extension == Constants.CSharpExtention && includedDirectory)
             {
                 files.Add(line);
             }
         }
 
-        static bool IsIncludedDirectory(string line) => excludedDirectories.Where(a => line.Contains(a)).Count() == 0;
-
+        static bool IsIncludedDirectory(string line) => Constants.ExcludedDirectories.Where(a => line.Contains(a)).Count() == 0;
     }
 }

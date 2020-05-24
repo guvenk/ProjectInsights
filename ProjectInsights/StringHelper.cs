@@ -41,7 +41,6 @@ namespace ProjectInsights
         private static int GetDistance(int[,] distance, int i, int j, int cost)
             => Math.Min(Math.Min(distance[i - 1, j] + 1, distance[i, j - 1] + 1), distance[i - 1, j - 1] + cost);
 
-
         public static int GetSimilarityPercentage(string source, string target)
         {
             if (source == target)
@@ -54,6 +53,5 @@ namespace ProjectInsights
 
         private static double GetPercentage(string source, string target, int stepsToSame)
             => 1.0 - (stepsToSame / (double)Math.Max(source.Length, target.Length));
-
     }
 }
