@@ -94,7 +94,6 @@ namespace ProjectInsights
             return cmdProcess;
         }
 
-
         //private void ShowFiles(ICollection<string> files)
         //{
         //    txtContent.Text += string.Join(Environment.NewLine, files);
@@ -105,11 +104,31 @@ namespace ProjectInsights
         private void ShowMetrics(IDictionary<string, int> metrics)
         {
             var sb = new StringBuilder();
-            foreach (var metric in metrics)
+            sb.AppendLine(" -- Percentages -- ");
+            sb.AppendLine();
+
+            int sum = metrics.Values.Sum();
+            foreach (var item in metrics)
             {
-                string formatted = string.Format("{0,-20}\t : {1,-6}", metric.Key, metric.Value);
+                float percentile = (float)item.Value / sum * 100;
+                string formatted = string.Format("{0,-20}\t : {1,-6}%", item.Key, percentile.ToString("F"));
+                sb.AppendLine(formatted);
+
+            }
+
+            sb.AppendLine();
+            sb.AppendLine(" -- Lines Of Code -- ");
+            sb.AppendLine();
+
+            foreach (var item in metrics)
+            {
+                string formatted = string.Format("{0,-20}\t : {1,-6}", item.Key, item.Value);
                 sb.AppendLine(formatted);
             }
+            sb.AppendLine();
+            sb.AppendLine("Total Lines: " + sum);
+
+
             txtContent.Text += sb;
         }
 

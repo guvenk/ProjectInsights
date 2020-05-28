@@ -201,7 +201,7 @@ namespace ProjectInsights
             lblSimilarity.Name = "lblSimilarity";
             lblSimilarity.Size = new System.Drawing.Size(83, 17);
             lblSimilarity.TabIndex = 2;
-            lblSimilarity.Text = "Similarity (%)";
+            lblSimilarity.Text = "Name Similarity (%)";
         }
 
         void SetupLabel1()
