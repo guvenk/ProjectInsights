@@ -1,19 +1,8 @@
-﻿using System.ComponentModel;
-using System.Windows.Forms;
-
-namespace ProjectInsights
+﻿namespace ProjectInsights
 {
     partial class FormInsights
     {
-        IContainer components = null;
-        Button btnShow;
-        Label label1;
-        Label lblSimilarity;
-        TextBox txtContent;
-        Label label2;
-        TextBox txtProjectPath;
-        Label lblError;
-        TextBox txtSimilarity;
+        private System.ComponentModel.IContainer components = null;
 
         protected override void Dispose(bool disposing)
         {
@@ -24,222 +13,123 @@ namespace ProjectInsights
             base.Dispose(disposing);
         }
 
-        void InitializeComponent()
+        private void InitializeComponent()
         {
-            AddAllControls();
-            SetupBtnShow();
-            SetupLabel1();
-            SetupLblSimilarity();
-            SetupTxtContent();
-            SetupLabel2();
-            SetupTxtProjectPath();
-            SetupLblError();
-            SetupTxtSimilarity();
-            SetupFormInsights();
-        }
-
-        void AddAllControls()
-        {
-            AddButtons();
-            AddLabels();
-            AddTextBoxes();
-            SuspendLayout();
-        }
-
-        void AddButtons()
-        {
-            btnShow = new System.Windows.Forms.Button();
-        }
-
-        void AddTextBoxes()
-        {
-            txtContent = new System.Windows.Forms.TextBox();
-            txtProjectPath = new System.Windows.Forms.TextBox();
-            txtSimilarity = new System.Windows.Forms.TextBox();
-        }
-
-        void AddLabels()
-        {
-            label1 = new System.Windows.Forms.Label();
-            lblSimilarity = new System.Windows.Forms.Label();
-            label2 = new System.Windows.Forms.Label();
-            lblError = new System.Windows.Forms.Label();
-        }
-
-        void SetupFormInsights()
-        {
-            // 
-            // FormInsights
-            // 
-            SetupFormProperties();
-            AddControlsToForm();
-            ResumeLayout(false);
-            PerformLayout();
-        }
-
-        void AddControlsToForm()
-        {
-            AddTextBoxesToForm();
-            AddLabelsToForm();
-            AddButtonsToForm();
-        }
-
-        void AddButtonsToForm()
-        {
-            Controls.Add(btnShow);
-        }
-
-        void AddTextBoxesToForm()
-        {
-            Controls.Add(txtSimilarity);
-            Controls.Add(txtProjectPath);
-            Controls.Add(txtContent);
-        }
-
-        void AddLabelsToForm()
-        {
-            Controls.Add(lblError);
-            Controls.Add(label2);
-            Controls.Add(lblSimilarity);
-            Controls.Add(label1);
-        }
-
-        void SetupFormProperties()
-        {
-            Name = "FormInsights";
-            Text = "Project Insights";
-            PositionForm();
-            Load += new System.EventHandler(FormInsights_Load);
-        }
-
-        void PositionForm()
-        {
-            ClientSize = new System.Drawing.Size(831, 472);
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-        }
-
-        void SetupTxtSimilarity()
-        {
-            // 
-            // txtSimilarity
-            // 
-            txtSimilarity.Location = new System.Drawing.Point(13, 78);
-            txtSimilarity.Name = "txtSimilarity";
-            txtSimilarity.Size = new System.Drawing.Size(129, 25);
-            txtSimilarity.TabIndex = 8;
-            txtSimilarity.Text = "70";
-            txtSimilarity.KeyPress += new System.Windows.Forms.KeyPressEventHandler(txtSimilarity_KeyPress);
-        }
-
-        void SetupLblError()
-        {
-            // 
-            // lblError
-            // 
-            lblError.AutoSize = true;
-            lblError.Location = new System.Drawing.Point(610, 12);
-            lblError.Name = "lblError";
-            lblError.Size = new System.Drawing.Size(0, 17);
-            lblError.TabIndex = 7;
-        }
-
-        void SetupTxtProjectPath()
-        {
-            // 
-            // txtProjectPath
-            // 
-            txtProjectPath.Location = new System.Drawing.Point(262, 9);
-            txtProjectPath.Name = "txtProjectPath";
-            txtProjectPath.Size = new System.Drawing.Size(342, 25);
-            txtProjectPath.TabIndex = 6;
-        }
-
-        void SetupLabel2()
-        {
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(148, 12);
-            label2.Name = "label2";
-            label2.Size = new System.Drawing.Size(108, 17);
-            label2.TabIndex = 5;
-            label2.Text = "Project path (.git)";
-        }
-
-        void SetupTxtContent()
-        {
-            // 
-            // txtContent
-            // 
-            PositionTxtContent();
-            txtContent.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            txtContent.Multiline = true;
-            txtContent.Name = "txtContent";
-            txtContent.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            txtContent.TabIndex = 4;
-        }
-
-        void PositionTxtContent()
-        {
-            txtContent.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            txtContent.Location = new System.Drawing.Point(148, 77);
-            txtContent.Size = new System.Drawing.Size(675, 382);
-        }
-
-        void SetupLblSimilarity()
-        {
-            // 
-            // lblSimilarity
-            // 
-            lblSimilarity.AutoSize = true;
-            lblSimilarity.Location = new System.Drawing.Point(12, 57);
-            lblSimilarity.Name = "lblSimilarity";
-            lblSimilarity.Size = new System.Drawing.Size(83, 17);
-            lblSimilarity.TabIndex = 2;
-            lblSimilarity.Text = "Name Similarity (%)";
-        }
-
-        void SetupLabel1()
-        {
-            // 
-            // label1
-            // 
-            PositionLabel1();
-            label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            label1.Name = "label1";
-            label1.TabIndex = 1;
-            label1.Text = "Project Insights";
-        }
-
-        void PositionLabel1()
-        {
-            label1.AutoSize = true;
-            label1.Location = new System.Drawing.Point(12, 9);
-            label1.Size = new System.Drawing.Size(116, 21);
-        }
-
-        void SetupBtnShow()
-        {
+            this.btnShow = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.lblSimilarity = new System.Windows.Forms.Label();
+            this.txtContent = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.txtProjectPath = new System.Windows.Forms.TextBox();
+            this.lblError = new System.Windows.Forms.Label();
+            this.txtSimilarity = new System.Windows.Forms.TextBox();
+            this.SuspendLayout();
             // 
             // btnShow
             // 
-            PositionBtnShow();
-            btnShow.Name = "btnShow";
-            btnShow.TabIndex = 0;
-            btnShow.Text = "Show";
-            btnShow.UseVisualStyleBackColor = true;
-            btnShow.Click += new System.EventHandler(btnShow_Click);
+            this.btnShow.Location = new System.Drawing.Point(12, 114);
+            this.btnShow.Name = "btnShow";
+            this.btnShow.Size = new System.Drawing.Size(130, 35);
+            this.btnShow.TabIndex = 0;
+            this.btnShow.Text = "Show";
+            this.btnShow.UseVisualStyleBackColor = true;
+            this.btnShow.Click += new System.EventHandler(this.BtnShow_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(13, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(116, 21);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "Project Insights";
+            // 
+            // lblSimilarity
+            // 
+            this.lblSimilarity.AutoSize = true;
+            this.lblSimilarity.Location = new System.Drawing.Point(12, 58);
+            this.lblSimilarity.Name = "lblSimilarity";
+            this.lblSimilarity.Size = new System.Drawing.Size(113, 17);
+            this.lblSimilarity.TabIndex = 2;
+            this.lblSimilarity.Text = "Group Names (%)";
+            // 
+            // txtContent
+            // 
+            this.txtContent.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtContent.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.txtContent.Location = new System.Drawing.Point(157, 77);
+            this.txtContent.Multiline = true;
+            this.txtContent.Name = "txtContent";
+            this.txtContent.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtContent.Size = new System.Drawing.Size(666, 527);
+            this.txtContent.TabIndex = 4;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(157, 12);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(108, 17);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "Project path (.git)";
+            // 
+            // txtProjectPath
+            // 
+            this.txtProjectPath.Location = new System.Drawing.Point(270, 9);
+            this.txtProjectPath.Name = "txtProjectPath";
+            this.txtProjectPath.Size = new System.Drawing.Size(334, 25);
+            this.txtProjectPath.TabIndex = 6;
+            // 
+            // lblError
+            // 
+            this.lblError.AutoSize = true;
+            this.lblError.Location = new System.Drawing.Point(610, 13);
+            this.lblError.Name = "lblError";
+            this.lblError.Size = new System.Drawing.Size(18, 17);
+            this.lblError.TabIndex = 7;
+            this.lblError.Text = "--";
+            // 
+            // txtSimilarity
+            // 
+            this.txtSimilarity.Location = new System.Drawing.Point(13, 82);
+            this.txtSimilarity.Name = "txtSimilarity";
+            this.txtSimilarity.Size = new System.Drawing.Size(129, 25);
+            this.txtSimilarity.TabIndex = 8;
+            this.txtSimilarity.Text = "70";
+            this.txtSimilarity.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtSimilarity_KeyPress);
+            // 
+            // FormInsights
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(831, 617);
+            this.Controls.Add(this.txtSimilarity);
+            this.Controls.Add(this.lblError);
+            this.Controls.Add(this.txtProjectPath);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.txtContent);
+            this.Controls.Add(this.lblSimilarity);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.btnShow);
+            this.Name = "FormInsights";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Project Insights";
+            this.Load += new System.EventHandler(this.FormInsights_Load);
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
         }
 
-        void PositionBtnShow()
-        {
-            btnShow.Location = new System.Drawing.Point(12, 117);
-            btnShow.Size = new System.Drawing.Size(130, 35);
-        }
+        private System.Windows.Forms.Button btnShow;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblSimilarity;
+        private System.Windows.Forms.TextBox txtContent;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtProjectPath;
+        private System.Windows.Forms.Label lblError;
+        private System.Windows.Forms.TextBox txtSimilarity;
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ProjectInsights
@@ -14,7 +15,7 @@ namespace ProjectInsights
             InitializeComponent();
         }
 
-        void btnShow_Click(object sender, EventArgs e)
+        async void BtnShow_Click(object sender, EventArgs e)
         {
             try
             {
@@ -22,17 +23,30 @@ namespace ProjectInsights
 
                 Process gitProcess = CreateGitProcess("ls-files");
                 var files = FileHelper.GetFiles(gitProcess.StandardOutput);
-                var metrics = GetMetrics(files);
-                ShowMetrics(metrics);
+                var gitBlameMetrics = await GetGitBlameMetrics(files);
+                var gitCommitMetrics = await GetGitCommitMetrics();
+                ShowGitBlameMetrics(gitBlameMetrics);
+                ShowGitCommitMetrics(gitCommitMetrics);
                 //ShowFiles(files);
 
             }
-            catch (Exception ex) { lblError.Text = ex.Message; }
+            catch (Exception ex)
+            {
+                lblError.Text = ex.Message;
+            }
         }
 
-        IDictionary<string, int> GetMetrics(ICollection<string> files)
+        private async Task<IDictionary<string, int>> GetGitCommitMetrics()
         {
-            var metrics = CalculateMetrics(files);
+            //throw new NotImplementedException();
+            return await Task.FromResult<IDictionary<string, int>>(null);
+        }
+
+
+
+        private async Task<IDictionary<string, int>> GetGitBlameMetrics(ICollection<string> files)
+        {
+            var metrics = await CalculateGitBlameMetrics(files);
 
             EliminateDuplicates(metrics);
 
@@ -41,22 +55,22 @@ namespace ProjectInsights
             return sortedMetrics;
         }
 
-        static IDictionary<string, int> GetSortedMetrics(IDictionary<string, int> metrics)
+        private static IDictionary<string, int> GetSortedMetrics(IDictionary<string, int> metrics)
             => metrics.OrderByDescending(a => a.Value).ToDictionary(a => a.Key, b => b.Value);
 
-        IDictionary<string, int> CalculateMetrics(ICollection<string> files)
+        private async Task<IDictionary<string, int>> CalculateGitBlameMetrics(ICollection<string> files)
         {
             var metrics = new Dictionary<string, int>();
             foreach (var file in files)
             {
-                var fileMetrics = GetFileMetrics(file);
+                var fileMetrics = await GetFileMetrics(file);
                 MetricsHelper.AddFileMetrics(metrics, fileMetrics);
             }
 
             return metrics;
         }
 
-        void EliminateDuplicates(IDictionary<string, int> metricsDictionary)
+        private void EliminateDuplicates(IDictionary<string, int> metricsDictionary)
         {
             bool combinationFound = true;
 
@@ -67,15 +81,19 @@ namespace ProjectInsights
             }
         }
 
-        IDictionary<string, int> GetFileMetrics(string fileName)
+        private async Task<IDictionary<string, int>> GetFileMetrics(string fileName)
         {
             string gitBlameCommand = $"blame {fileName} -fte";
             var gitProcess = CreateGitProcess(gitBlameCommand);
-            var authors = FileHelper.GetAuthorsFromFile(gitProcess.StandardOutput, fileName);
+            var authors = await FileHelper.GetAuthorsFromFile(gitProcess.StandardOutput, fileName);
             var fileMetrics = MetricsHelper.GroupMetricsByAuthorName(authors);
 
             return fileMetrics;
         }
+
+
+
+        const string getPersonStat = "git log --pretty=format:\" % ce\" --shortstat";
 
         private Process CreateGitProcess(string command)
         {
@@ -101,7 +119,7 @@ namespace ProjectInsights
         //    txtContent.Text += $"Files Count: {files.Count}";
         //}
 
-        private void ShowMetrics(IDictionary<string, int> metrics)
+        private void ShowGitBlameMetrics(IDictionary<string, int> metrics)
         {
             var sb = new StringBuilder();
             sb.AppendLine(" -- Percentages -- ");
@@ -132,12 +150,17 @@ namespace ProjectInsights
             txtContent.Text += sb;
         }
 
+        private void ShowGitCommitMetrics(IDictionary<string, int> gitCommitMetrics)
+        {
+            throw new NotImplementedException();
+        }
+
         private void FormInsights_Load(object sender, EventArgs e)
         {
             txtProjectPath.Text = Constants.RepositoryPath;
         }
 
-        private void txtSimilarity_KeyPress(object sender, KeyPressEventArgs e)
+        private void TxtSimilarity_KeyPress(object sender, KeyPressEventArgs e)
         {
             char ch = e.KeyChar;
             if (!char.IsDigit(ch) && ch != 8)

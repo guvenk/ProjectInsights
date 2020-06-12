@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ProjectInsights
 {
     public class FileHelper
     {
 
-        public static IList<string> GetAuthorsFromFile(StreamReader output, string fileName)
+        public static async Task<IList<string>> GetAuthorsFromFile(StreamReader output, string fileName)
         {
             var list = new List<string>();
 
             string line;
-            while ((line = output.ReadLine()) != null)
+            while ((line = await output.ReadLineAsync()) != null)
             {
                 if (line.Contains(fileName))
                 {
