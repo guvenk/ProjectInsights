@@ -19,6 +19,5 @@ namespace ProjectInsights
             Process cmdProcess = Process.Start(startInfo);
             return cmdProcess;
         }
-
     }
 }

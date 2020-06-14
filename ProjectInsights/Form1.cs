@@ -11,7 +11,6 @@ namespace ProjectInsights
     public partial class FormInsights : Form
     {
         private const string Format = "{0,-21}\t : {1,-6}";
-
         public FormInsights()
         {
             InitializeComponent();

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ProjectInsights
+﻿namespace ProjectInsights
 {
     public class StringHelper
     {
