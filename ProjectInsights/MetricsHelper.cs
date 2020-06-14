@@ -158,9 +158,18 @@ namespace ProjectInsights
 
         private static void ProcessGitLog(Dictionary<string, (int, int)> metrics, string item)
         {
-            int totalChange = 0;
             var metricsAndMail = item.Trim().Split("\n").Reverse().ToList();
             var metricLine = metricsAndMail[0].Trim().Split(",");
+            int totalChange = GetTotalChange(metricLine);
+
+            string mail = StringHelper.SanitizeEmail(metricsAndMail[1].Trim());
+
+            AddChangesToMetrics(metrics, totalChange, mail);
+        }
+
+        private static int GetTotalChange(string[] metricLine)
+        {
+            int totalChange = 0;
             if (metricLine.Length == 3)
             {
                 int insertion = StringHelper.GetInsertion(metricLine);
@@ -175,8 +184,11 @@ namespace ProjectInsights
                 totalChange += changes;
             }
 
-            string mail = StringHelper.SanitizeEmail(metricsAndMail[1].Trim());
+            return totalChange;
+        }
 
+        private static void AddChangesToMetrics(Dictionary<string, (int, int)> metrics, int totalChange, string mail)
+        {
             if (metrics.ContainsKey(mail))
             {
                 (int existingChanges, int commitCount) = metrics[mail];
@@ -184,7 +196,6 @@ namespace ProjectInsights
             }
             else
                 metrics.Add(mail, (totalChange, 1));
-
         }
     }
 }
