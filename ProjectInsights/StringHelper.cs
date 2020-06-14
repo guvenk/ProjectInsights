@@ -4,54 +4,33 @@ namespace ProjectInsights
 {
     public class StringHelper
     {
-        public static int ComputeLevenshteinDistance(string source, string target)
+        public static string SanitizeGitBlameLine(string line)
         {
-            if (source == target)
-                return source.Length;
-
-            int[,] distance = new int[source.Length + 1, target.Length + 1];
-
-            // Step 2
-            Step2(source, target, distance);
-
-            Step3and4(source, target, distance);
-
-            return distance[source.Length, target.Length];
+            int startIdx = line.IndexOf("<") + 1;
+            int length = line.IndexOf(">") - startIdx;
+            line = line.Substring(startIdx, length);
+            line = SanitizeEmail(line);
+            return line;
         }
 
-        private static void Step2(string source, string target, int[,] distance)
+        public static string SanitizeEmail(string line)
         {
-            for (int i = 0; i <= source.Length; distance[i, 0] = i++) ;
-            for (int j = 0; j <= target.Length; distance[0, j] = j++) ;
+            return line.Substring(0, line.IndexOf("@")).Replace(".", Constants.Space);
         }
 
-        private static void Step3and4(string source, string target, int[,] distance)
+        public static int GetInsertion(string[] metricLine)
         {
-            for (int i = 1; i <= source.Length; i++)
-                for (int j = 1; j <= target.Length; j++)
-                    CalculateDistance(source, target, distance, i, j);
+            return int.Parse(metricLine[1].Replace("insertions(+)", "").Replace("insertion(+)", "").Trim());
         }
 
-        private static void CalculateDistance(string source, string target, int[,] distance, int i, int j)
+        public static int GetRemoval(string[] metricLine)
         {
-            int cost = (target[j - 1] == source[i - 1]) ? 0 : 1;
-            distance[i, j] = GetDistance(distance, i, j, cost);
+            return int.Parse(metricLine[2].Replace("deletions(-)", "").Replace("deletion(-)", "").Trim());
         }
 
-        private static int GetDistance(int[,] distance, int i, int j, int cost)
-            => Math.Min(Math.Min(distance[i - 1, j] + 1, distance[i, j - 1] + 1), distance[i - 1, j - 1] + cost);
-
-        public static int GetSimilarityPercentage(string source, string target)
+        public static int GetChanges(string[] metricLine)
         {
-            if (source == target)
-                return 100;
-
-            int stepsToSame = ComputeLevenshteinDistance(source, target);
-            var percentage = GetPercentage(source, target, stepsToSame);
-            return Convert.ToInt32(percentage * 100);
+            return int.Parse(metricLine[1].Replace("insertions(+)", "").Replace("insertion(+)", "").Replace("deletions(-)", "").Replace("deletion(-)", "").Trim());
         }
-
-        private static double GetPercentage(string source, string target, int stepsToSame)
-            => 1.0 - (stepsToSame / (double)Math.Max(source.Length, target.Length));
     }
 }

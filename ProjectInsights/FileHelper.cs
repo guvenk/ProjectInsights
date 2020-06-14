@@ -7,7 +7,6 @@ namespace ProjectInsights
 {
     public class FileHelper
     {
-
         public static async Task<IList<string>> GetAuthorsFromFile(StreamReader output, string fileName)
         {
             var list = new List<string>();
@@ -17,23 +16,12 @@ namespace ProjectInsights
             {
                 if (line.Contains(fileName))
                 {
-                    string author = SanitizeLine(line);
+                    string author = StringHelper.SanitizeGitBlameLine(line);
                     list.Add(author);
-                    //if (author.ToLower().Contains("somename"))
-                    //    ben.Add(fileName);
                 }
             }
 
             return list;
-        }
-
-        public static string SanitizeLine(string line)
-        {
-            int startIdx = line.IndexOf("<") + 1;
-            int length = line.IndexOf(">") - startIdx;
-            line = line.Substring(startIdx, length);
-            line = line.Substring(0, line.IndexOf("@")).Replace(".", Constants.Space);
-            return line;
         }
 
         public static ICollection<string> GetFiles(StreamReader output)

@@ -64,7 +64,7 @@
             this.txtContent.Multiline = true;
             this.txtContent.Name = "txtContent";
             this.txtContent.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtContent.Size = new System.Drawing.Size(666, 527);
+            this.txtContent.Size = new System.Drawing.Size(686, 527);
             this.txtContent.TabIndex = 4;
             // 
             // label2
@@ -98,14 +98,14 @@
             this.txtSimilarity.Name = "txtSimilarity";
             this.txtSimilarity.Size = new System.Drawing.Size(129, 25);
             this.txtSimilarity.TabIndex = 8;
-            this.txtSimilarity.Text = "70";
+            this.txtSimilarity.Text = "100";
             this.txtSimilarity.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtSimilarity_KeyPress);
             // 
             // FormInsights
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(831, 617);
+            this.ClientSize = new System.Drawing.Size(851, 617);
             this.Controls.Add(this.txtSimilarity);
             this.Controls.Add(this.lblError);
             this.Controls.Add(this.txtProjectPath);

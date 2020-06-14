@@ -10,6 +10,8 @@ namespace ProjectInsights
 {
     public partial class FormInsights : Form
     {
+        private const string Format = "{0,-21}\t : {1,-6}";
+
         public FormInsights()
         {
             InitializeComponent();
@@ -21,14 +23,17 @@ namespace ProjectInsights
             {
                 txtContent.Text = string.Empty;
 
-                Process gitProcess = CreateGitProcess("ls-files");
+                Process gitProcess = ProcessHelper.CreateGitProcess("ls-files", txtProjectPath.Text);
                 var files = FileHelper.GetFiles(gitProcess.StandardOutput);
+
                 var gitBlameMetrics = await GetGitBlameMetrics(files);
                 var gitCommitMetrics = await GetGitCommitMetrics();
+
                 ShowGitBlameMetrics(gitBlameMetrics);
                 ShowGitCommitMetrics(gitCommitMetrics);
-                //ShowFiles(files);
 
+
+                //ShowFiles(files);
             }
             catch (Exception ex)
             {
@@ -36,19 +41,33 @@ namespace ProjectInsights
             }
         }
 
-        private async Task<IDictionary<string, int>> GetGitCommitMetrics()
+        private async Task<IDictionary<string, (int, int)>> GetGitCommitMetrics()
         {
-            //throw new NotImplementedException();
-            return await Task.FromResult<IDictionary<string, int>>(null);
+            string gitLogCommand = "log --pretty=format:\" % ce\" --shortstat";
+            var gitProcess = ProcessHelper.CreateGitProcess(gitLogCommand, txtProjectPath.Text);
+            var commitMetrics = await MetricsHelper.GetMetricsFromGitLog(gitProcess.StandardOutput);
+
+            EliminateGitCommitDuplicates(commitMetrics);
+
+            return commitMetrics;
         }
 
+        private void EliminateGitCommitDuplicates(Dictionary<string, (int, int)> commitMetrics)
+        {
+            bool combinationFound = true;
 
+            while (combinationFound)
+            {
+                int similarityPercentage = int.Parse(txtSimilarity.Text);
+                combinationFound = MetricsHelper.IsCombinationFound(commitMetrics, similarityPercentage);
+            }
+        }
 
         private async Task<IDictionary<string, int>> GetGitBlameMetrics(ICollection<string> files)
         {
             var metrics = await CalculateGitBlameMetrics(files);
 
-            EliminateDuplicates(metrics);
+            EliminateGitBlameDuplicates(metrics);
 
             var sortedMetrics = GetSortedMetrics(metrics);
 
@@ -70,7 +89,7 @@ namespace ProjectInsights
             return metrics;
         }
 
-        private void EliminateDuplicates(IDictionary<string, int> metricsDictionary)
+        private void EliminateGitBlameDuplicates(IDictionary<string, int> metricsDictionary)
         {
             bool combinationFound = true;
 
@@ -84,7 +103,7 @@ namespace ProjectInsights
         private async Task<IDictionary<string, int>> GetFileMetrics(string fileName)
         {
             string gitBlameCommand = $"blame {fileName} -fte";
-            var gitProcess = CreateGitProcess(gitBlameCommand);
+            var gitProcess = ProcessHelper.CreateGitProcess(gitBlameCommand, txtProjectPath.Text);
             var authors = await FileHelper.GetAuthorsFromFile(gitProcess.StandardOutput, fileName);
             var fileMetrics = MetricsHelper.GroupMetricsByAuthorName(authors);
 
@@ -92,25 +111,6 @@ namespace ProjectInsights
         }
 
 
-
-        const string getPersonStat = "git log --pretty=format:\" % ce\" --shortstat";
-
-        private Process CreateGitProcess(string command)
-        {
-            string prjAbsolutePath = txtProjectPath.Text;
-            ProcessStartInfo startInfo = new ProcessStartInfo()
-            {
-                FileName = "git",
-                WorkingDirectory = prjAbsolutePath,
-                CreateNoWindow = true,
-                Arguments = $@"--git-dir {prjAbsolutePath}\.git {command}",
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            };
-
-            Process cmdProcess = Process.Start(startInfo);
-            return cmdProcess;
-        }
 
         //private void ShowFiles(ICollection<string> files)
         //{
@@ -129,7 +129,7 @@ namespace ProjectInsights
             foreach (var item in metrics)
             {
                 float percentile = (float)item.Value / sum * 100;
-                string formatted = string.Format("{0,-20}\t : {1,-6}%", item.Key, percentile.ToString("F"));
+                string formatted = string.Format(Format + " %", item.Key, percentile.ToString("F"));
                 sb.AppendLine(formatted);
 
             }
@@ -140,7 +140,7 @@ namespace ProjectInsights
 
             foreach (var item in metrics)
             {
-                string formatted = string.Format("{0,-20}\t : {1,-6}", item.Key, item.Value);
+                string formatted = string.Format(Format, item.Key, item.Value);
                 sb.AppendLine(formatted);
             }
             sb.AppendLine();
@@ -150,9 +150,43 @@ namespace ProjectInsights
             txtContent.Text += sb;
         }
 
-        private void ShowGitCommitMetrics(IDictionary<string, int> gitCommitMetrics)
+        private void ShowGitCommitMetrics(IDictionary<string, (int, int)> gitCommitMetrics)
         {
-            throw new NotImplementedException();
+            var sb = new StringBuilder();
+            sb.AppendLine(" -- Commit Counts -- ");
+            sb.AppendLine();
+
+            foreach (var item in gitCommitMetrics.OrderByDescending(a => a.Value.Item2))
+            {
+                (_, int commitCount) = item.Value;
+                string formatted = string.Format(Format, item.Key, commitCount);
+                sb.AppendLine(formatted);
+            }
+
+            sb.AppendLine();
+            sb.AppendLine(" -- Average Commit Size -- ");
+            sb.AppendLine();
+
+            foreach (var item in gitCommitMetrics.OrderByDescending(a => a.Value.Item1 / a.Value.Item2))
+            {
+                (int totalChange, int commitCount) = item.Value;
+                int averageCommitSize = totalChange / commitCount;
+                string formatted = string.Format(Format, item.Key, averageCommitSize);
+                sb.AppendLine(formatted);
+            }
+
+            sb.AppendLine();
+            sb.AppendLine(" -- Total Line of Code Change -- ");
+            sb.AppendLine();
+
+            foreach (var item in gitCommitMetrics.OrderByDescending(a => a.Value.Item1))
+            {
+                (int totalChange, int commitCount) = item.Value;
+                string formatted = string.Format(Format, item.Key, totalChange);
+                sb.AppendLine(formatted);
+            }
+
+            txtContent.Text += sb;
         }
 
         private void FormInsights_Load(object sender, EventArgs e)

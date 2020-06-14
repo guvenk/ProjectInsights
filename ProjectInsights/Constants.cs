@@ -6,7 +6,7 @@ namespace ProjectInsights
     {
         //readonly char[] nameDelimeters = new[] { ' ', '.', '-' };
 
-        public static readonly int StopCount = 40;
+        public static readonly int StopCount = -1;
         public const string Space = " ";
         public const string CSharpExtention = ".cs";
         public static readonly HashSet<string> ExcludedDirectories = new HashSet<string>() { "Proxies", "Migrations", };
