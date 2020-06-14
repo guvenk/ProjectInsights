@@ -50,9 +50,9 @@
             this.lblSimilarity.AutoSize = true;
             this.lblSimilarity.Location = new System.Drawing.Point(12, 58);
             this.lblSimilarity.Name = "lblSimilarity";
-            this.lblSimilarity.Size = new System.Drawing.Size(113, 17);
+            this.lblSimilarity.Size = new System.Drawing.Size(115, 17);
             this.lblSimilarity.TabIndex = 2;
-            this.lblSimilarity.Text = "Group Names (%)";
+            this.lblSimilarity.Text = "Merge Names (%)";
             // 
             // txtContent
             // 
@@ -64,7 +64,7 @@
             this.txtContent.Multiline = true;
             this.txtContent.Name = "txtContent";
             this.txtContent.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtContent.Size = new System.Drawing.Size(686, 527);
+            this.txtContent.Size = new System.Drawing.Size(447, 528);
             this.txtContent.TabIndex = 4;
             // 
             // label2
@@ -78,6 +78,8 @@
             // 
             // txtProjectPath
             // 
+            this.txtProjectPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtProjectPath.Location = new System.Drawing.Point(270, 9);
             this.txtProjectPath.Name = "txtProjectPath";
             this.txtProjectPath.Size = new System.Drawing.Size(334, 25);
@@ -86,7 +88,7 @@
             // lblError
             // 
             this.lblError.AutoSize = true;
-            this.lblError.Location = new System.Drawing.Point(610, 13);
+            this.lblError.Location = new System.Drawing.Point(157, 45);
             this.lblError.Name = "lblError";
             this.lblError.Size = new System.Drawing.Size(18, 17);
             this.lblError.TabIndex = 7;
@@ -105,7 +107,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(851, 617);
+            this.ClientSize = new System.Drawing.Size(616, 617);
             this.Controls.Add(this.txtSimilarity);
             this.Controls.Add(this.lblError);
             this.Controls.Add(this.txtProjectPath);

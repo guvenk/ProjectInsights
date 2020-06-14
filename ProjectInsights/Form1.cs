@@ -21,7 +21,13 @@ namespace ProjectInsights
         {
             try
             {
-                txtContent.Text = string.Empty;
+                if (string.IsNullOrWhiteSpace(txtProjectPath.Text))
+                {
+                    lblError.Text = "Please select a project path.";
+                    return;
+                }
+
+                txtContent.Text = "Please wait...";
 
                 Process gitProcess = ProcessHelper.CreateGitProcess("ls-files", txtProjectPath.Text);
                 var files = FileHelper.GetFiles(gitProcess.StandardOutput);
@@ -29,11 +35,11 @@ namespace ProjectInsights
                 var gitBlameMetrics = await GetGitBlameMetrics(files);
                 var gitCommitMetrics = await GetGitCommitMetrics();
 
+                txtContent.Text = "";
+
                 ShowGitBlameMetrics(gitBlameMetrics);
                 ShowGitCommitMetrics(gitCommitMetrics);
 
-
-                //ShowFiles(files);
             }
             catch (Exception ex)
             {
@@ -110,15 +116,6 @@ namespace ProjectInsights
             return fileMetrics;
         }
 
-
-
-        //private void ShowFiles(ICollection<string> files)
-        //{
-        //    txtContent.Text += string.Join(Environment.NewLine, files);
-        //    txtContent.Text += Environment.NewLine + Environment.NewLine;
-        //    txtContent.Text += $"Files Count: {files.Count}";
-        //}
-
         private void ShowGitBlameMetrics(IDictionary<string, int> metrics)
         {
             var sb = new StringBuilder();
@@ -153,6 +150,7 @@ namespace ProjectInsights
         private void ShowGitCommitMetrics(IDictionary<string, (int, int)> gitCommitMetrics)
         {
             var sb = new StringBuilder();
+            sb.AppendLine();
             sb.AppendLine(" -- Commit Counts -- ");
             sb.AppendLine();
 
