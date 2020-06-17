@@ -70,7 +70,11 @@ namespace ProjectInsights
             return combinationFound;
         }
 
-        private static bool ProcessCombination(Dictionary<string, (int, int)> commitMetricsDictionary, KeyValuePair<string, (int, int)> metric, string firstName, string otherKey, int similarityPercentage)
+        private static bool ProcessCombination(Dictionary<string, (int, int)> commitMetricsDictionary, 
+            KeyValuePair<string, (int, int)> metric, 
+            string firstName, 
+            string otherKey, 
+            int similarityPercentage)
         {
             string otherFirstName = GetFirstPart(otherKey);
 
@@ -83,7 +87,11 @@ namespace ProjectInsights
             return false;
         }
 
-        private static bool ProcessCombination(IDictionary<string, int> metricsDictionary, KeyValuePair<string, int> metric, string firstName, string otherKey, int similarityPercentage)
+        private static bool ProcessCombination(IDictionary<string, int> metricsDictionary, 
+            KeyValuePair<string, int> 
+            metric, string firstName, 
+            string otherKey, 
+            int similarityPercentage)
         {
             string otherFirstName = GetFirstPart(otherKey);
 
@@ -96,7 +104,9 @@ namespace ProjectInsights
             return false;
         }
 
-        private static IEnumerable<string> GetOtherKeys(Dictionary<string, (int, int)> commitMetricsDictionary, KeyValuePair<string, (int, int)> metric)
+        private static IEnumerable<string> GetOtherKeys(
+            Dictionary<string, (int, int)> commitMetricsDictionary, 
+            KeyValuePair<string, (int, int)> metric)
         {
             return commitMetricsDictionary.Keys.Where(a => a != metric.Key);
         }
