@@ -8,6 +8,9 @@ namespace ProjectInsights
 {
     public class MetricsHelper
     {
+        private const int insertionAndDeletion = 3;
+        private const int insertionOrDeletion = 2;
+
         public static bool IsCombinationFound(IDictionary<string, int> gitBlameMetrics, int similarityPercentage)
         {
             bool combinationFound = false;
@@ -52,10 +55,10 @@ namespace ProjectInsights
             return combinationFound;
         }
 
-        private static bool ProcessCombination(Dictionary<string, (int, int)> commitMetricsDictionary, 
-            KeyValuePair<string, (int, int)> metric, 
-            string firstName, 
-            string otherKey, 
+        private static bool ProcessCombination(Dictionary<string, (int, int)> commitMetricsDictionary,
+            KeyValuePair<string, (int, int)> metric,
+            string firstName,
+            string otherKey,
             int similarityPercentage)
         {
             string otherFirstName = GetFirstPart(otherKey);
@@ -69,10 +72,10 @@ namespace ProjectInsights
             return false;
         }
 
-        private static bool ProcessCombination(IDictionary<string, int> metricsDictionary, 
-            KeyValuePair<string, int> 
-            metric, string firstName, 
-            string otherKey, 
+        private static bool ProcessCombination(IDictionary<string, int> metricsDictionary,
+            KeyValuePair<string, int>
+            metric, string firstName,
+            string otherKey,
             int similarityPercentage)
         {
             string otherFirstName = GetFirstPart(otherKey);
@@ -87,7 +90,7 @@ namespace ProjectInsights
         }
 
         private static IEnumerable<string> GetOtherKeys(
-            Dictionary<string, (int, int)> commitMetricsDictionary, 
+            Dictionary<string, (int, int)> commitMetricsDictionary,
             KeyValuePair<string, (int, int)> metric)
         {
             return commitMetricsDictionary.Keys.Where(a => a != metric.Key);
@@ -135,15 +138,13 @@ namespace ProjectInsights
 
         public static async Task<Dictionary<string, (int, int)>> GetMetricsFromGitLog(StreamReader output)
         {
-            // key: mail, value: (totalChange int, commitCount)
+            // key: mail, value: (totalChange, commitCount)
             var metrics = new Dictionary<string, (int, int)>();
             string all = await output.ReadToEndAsync();
             var logs = all.Split("\n\n").ToList();
 
             foreach (var log in logs)
-            {
                 ProcessGitLog(metrics, log);
-            }
 
             return metrics;
         }
@@ -161,22 +162,20 @@ namespace ProjectInsights
 
         private static int GetTotalChange(string[] metricLine)
         {
-            int totalChange = 0;
-            if (metricLine.Length == 3)
+            if (metricLine.Length == insertionAndDeletion)
             {
-                int insertion = StringHelper.GetInsertion(metricLine);
-                int removal = StringHelper.GetRemoval(metricLine);
+                int insertions = StringHelper.GetInsertion(metricLine);
+                int deletions = StringHelper.GetRemoval(metricLine);
 
-                totalChange += insertion;
-                totalChange += removal;
+                return insertions + deletions;
             }
-            else if (metricLine.Length == 2)
+            else if (metricLine.Length == insertionOrDeletion)
             {
                 int changes = StringHelper.GetChanges(metricLine);
-                totalChange += changes;
+                return changes;
             }
 
-            return totalChange;
+            return 0;
         }
 
         private static void AddChangesToMetrics(Dictionary<string, (int, int)> metrics, int totalChange, string mail)

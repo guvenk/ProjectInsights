@@ -103,7 +103,7 @@ namespace ProjectInsights
             }
 
             sb.AppendLine();
-            sb.AppendLine(" -- Total Line of Code Change -- ");
+            sb.AppendLine(" -- Total Insertion & Deletions -- ");
             sb.AppendLine();
 
             foreach (var item in gitCommitMetrics.OrderByDescending(a => a.Value.Item1))
