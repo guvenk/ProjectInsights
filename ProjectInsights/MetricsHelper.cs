@@ -8,25 +8,7 @@ namespace ProjectInsights
 {
     public class MetricsHelper
     {
-        public static void AddFileMetrics(IDictionary<string, int> metrics, IDictionary<string, int> fileMetrics)
-        {
-            foreach (var pair in fileMetrics)
-            {
-                if (!metrics.ContainsKey(pair.Key))
-                    metrics[pair.Key] = pair.Value;
-                else
-                    metrics[pair.Key] += pair.Value;
-            }
-        }
-
-        public static Dictionary<string, int> GroupMetricsByAuthorName(IList<string> authors)
-        {
-            return authors
-                .GroupBy(a => a)
-                .ToDictionary(g => g.Key, g => g.Count());
-        }
-
-        public static bool IsCombinationFound(IDictionary<string, int> gitBlameMetrics, int similarityAllowance)
+        public static bool IsCombinationFound(IDictionary<string, int> gitBlameMetrics, int similarityPercentage)
         {
             bool combinationFound = false;
             foreach (var metric in gitBlameMetrics)
@@ -39,7 +21,7 @@ namespace ProjectInsights
                                                           metric,
                                                           firstName,
                                                           otherKey,
-                                                          similarityAllowance);
+                                                          similarityPercentage);
                     if (combinationFound) break;
                 }
                 if (combinationFound) break;

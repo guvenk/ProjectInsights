@@ -30,7 +30,7 @@ namespace ProjectInsights
                 GitBlame gitBlame = new GitBlame(txtProjectPath.Text, txtSimilarity.Text);
                 GitCommit gitCommit = new GitCommit(txtProjectPath.Text, txtSimilarity.Text);
 
-                var gitBlameMetrics = await gitBlame.GetGitBlameMetrics();
+                var gitBlameMetrics = gitBlame.GetGitBlameMetrics();
                 var gitCommitMetrics = await gitCommit.GetGitCommitMetrics();
 
                 txtContent.Text = "";
@@ -44,7 +44,6 @@ namespace ProjectInsights
                 lblError.Text = ex.Message;
             }
         }
-
 
         private void ShowGitBlameMetrics(IDictionary<string, int> metrics)
         {

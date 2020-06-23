@@ -7,7 +7,6 @@ namespace ProjectInsights
     public class GitCommit
     {
         private readonly string projectPath;
-
         private readonly int similarityPercentage;
 
         public GitCommit(string prjPath, string similarity)
@@ -15,6 +14,7 @@ namespace ProjectInsights
             projectPath = prjPath;
             similarityPercentage = int.Parse(similarity);
         }
+
         public async Task<IDictionary<string, (int, int)>> GetGitCommitMetrics()
         {
             string gitLogCommand = "log --pretty=format:\" % ce\" --shortstat";

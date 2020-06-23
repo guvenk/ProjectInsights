@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
+using LibGit2Sharp;
 
 namespace ProjectInsights
 {
@@ -16,12 +15,33 @@ namespace ProjectInsights
             projectPath = prjPath;
             similarityPercentage = int.Parse(similarity);
         }
-        public async Task<IDictionary<string, int>> GetGitBlameMetrics()
-        {
-            Process gitProcess = ProcessHelper.CreateGitProcess("ls-files", projectPath);
-            var files = FileHelper.GetFiles(gitProcess.StandardOutput);
 
-            var metrics = await CalculateGitBlameMetrics(files);
+        public IDictionary<string, int> GetGitBlameMetrics()
+        {
+            var metrics = new Dictionary<string, int>();
+            using (var repo = new Repository(projectPath))
+            {
+                var files = repo.Index
+                    .Where(x => FileHelper.IsValidFile(x.Path))
+                    .Select(x => x.Path)
+                    .ToList();
+
+                foreach (var file in files)
+                {
+                    var blame = repo.Blame(file);
+                    int lineCount = 0;
+                    foreach (var item in blame)
+                    {
+                        string authorMail = StringHelper.SanitizeEmail(item.InitialSignature.Email);
+                        if (!metrics.ContainsKey(authorMail))
+                            metrics[authorMail] = item.LineCount;
+                        else
+                            metrics[authorMail] += item.LineCount;
+
+                        lineCount += item.LineCount;
+                    }
+                }
+            }
 
             EliminateGitBlameDuplicates(metrics);
 
@@ -31,29 +51,8 @@ namespace ProjectInsights
         }
 
         private static IDictionary<string, int> GetSortedMetrics(IDictionary<string, int> metrics)
-            => metrics.OrderByDescending(a => a.Value).ToDictionary(a => a.Key, b => b.Value);
-
-        private async Task<IDictionary<string, int>> CalculateGitBlameMetrics(ICollection<string> files)
         {
-            var metrics = new Dictionary<string, int>();
-            foreach (var file in files)
-            {
-                var fileMetrics = await GetFileMetrics(file);
-                MetricsHelper.AddFileMetrics(metrics, fileMetrics);
-            }
-
-            return metrics;
-        }
-
-        private async Task<IDictionary<string, int>> GetFileMetrics(string fileName)
-        {
-            string gitBlameCommand = $"blame {fileName} -fte";
-            var gitProcess = ProcessHelper.CreateGitProcess(gitBlameCommand, projectPath);
-            var authors = await FileHelper.GetAuthorsFromFile(gitProcess.StandardOutput, fileName);
-            var fileMetrics = MetricsHelper.GroupMetricsByAuthorName(authors);
-
-            return fileMetrics;
-
+            return metrics.OrderByDescending(a => a.Value).ToDictionary(a => a.Key, b => b.Value);
         }
 
         private void EliminateGitBlameDuplicates(IDictionary<string, int> metricsDictionary)
@@ -61,11 +60,7 @@ namespace ProjectInsights
             bool combinationFound = true;
 
             while (combinationFound)
-            {
                 combinationFound = MetricsHelper.IsCombinationFound(metricsDictionary, similarityPercentage);
-            }
         }
-
-
     }
 }
